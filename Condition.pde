@@ -1,17 +1,15 @@
 class Condition {
   String name;
   String type;
-  float stickyStrength;
-  float gravityStrength;
+  float strength; // strength of stickiness or gravity
   int totalTrials;
   int errorCount = 0;
   ArrayList<String> results = new ArrayList<String>();
   
-  Condition(String name, String type, float stickyStrength, float gravityStrength, int totalTrials) {
+  Condition(String name, String type, float strength, int totalTrials) {
     this.name = name;
     this.type = type;
-    this.stickyStrength = stickyStrength;
-    this.gravityStrength = gravityStrength;;
+    this.strength = strength;
     this.totalTrials = totalTrials;
   }
   

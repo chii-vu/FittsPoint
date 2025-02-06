@@ -71,10 +71,10 @@ public void setup() {
   
   // Initialize conditions
   conditions = new ArrayList<Condition>();
-  conditions.add(new Condition("Sticky-Zero", "Regular", 0, 0, NUM_TRIALS));
-  conditions.add(new Condition("Sticky-Low", "STICKY", 2.0, 0, NUM_TRIALS)); // Low sticky
-  conditions.add(new Condition("Sticky-Medium", "STICKY", 10.0, 0, NUM_TRIALS)); // Medium sticky
-  conditions.add(new Condition("Sticky-High", "STICKY", 30.0, 0, NUM_TRIALS)); // High sticky
+  conditions.add(new Condition("Sticky-Zero", "Regular", 0, NUM_TRIALS));
+  conditions.add(new Condition("Sticky-Low", "STICKY", 2.0, NUM_TRIALS)); // Low sticky
+  conditions.add(new Condition("Sticky-Medium", "STICKY", 10.0, NUM_TRIALS)); // Medium sticky
+  conditions.add(new Condition("Sticky-High", "STICKY", 30.0, NUM_TRIALS)); // High sticky
   
   // Hide the real cursor
   noCursor();
@@ -139,7 +139,7 @@ void displayArtificialCursor() {
       float intersectionLength = target.intersectionLength(cursorPos.x, cursorPos.y, mouseX, mouseY);
       if (intersectionLength > 0) {
         float fractionInside = intersectionLength / delta.mag();
-        float stickyStrength = currentCondition.stickyStrength;
+        float stickyStrength = currentCondition.strength;
         delta.setMag(delta.mag() * (1 - fractionInside + fractionInside / stickyStrength));
       }
     }
