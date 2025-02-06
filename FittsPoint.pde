@@ -22,16 +22,11 @@ Condition currentCondition;
 int currentConditionIndex = 0;
 int currentTrial = 0;
 int targetIndex = -1;
-PVector cursorPos;
-PVector previousCursorPos; // Track previous cursor position for sticky targets
+PVector cursorPos; // real cursor position
 PShape artificialCursor;
 Robot robot;
 long trialStartTime;
 ExperimentPhase phase = ExperimentPhase.INSTRUCTIONS;
-
-// Sticky targets variables
-float stickyStrength = 4.0f; // C:D ratio strength (e.g., 4:1)
-boolean isSticky = false; // Whether sticky targets are active
 
 // Setup the canvas and initialize variables
 public void settings() {
@@ -42,7 +37,6 @@ public void settings() {
 public void setup() {
   // Initialize the artificial cursor
   cursorPos = new PVector(width / 2, height / 2);
-  previousCursorPos = new PVector(width / 2, height / 2); // Initialize previous position
   artificialCursor = createShape(ELLIPSE, 0, 0, 20, 20);
   artificialCursor.setFill(color(255, 255, 0)); // Yellow cursor
   
@@ -78,7 +72,9 @@ public void setup() {
   // Initialize conditions
   conditions = new ArrayList<Condition>();
   conditions.add(new Condition("NormalPointing", "Regular", 0, 0, NUM_TRIALS));
-  conditions.add(new Condition("StickyTargets", "STICKY", stickyStrength, 0, NUM_TRIALS));
+  conditions.add(new Condition("LowStickyTargets", "STICKY", 2.0, 0, NUM_TRIALS)); // Low sticky
+  conditions.add(new Condition("MediumStickyTargets", "STICKY", 8.0, 0, NUM_TRIALS)); // Medium sticky
+  conditions.add(new Condition("VeryStickyTargets", "STICKY", 12.0, 0, NUM_TRIALS)); // High sticky
   
   // Hide the real cursor
   noCursor();
@@ -131,30 +127,29 @@ void displayTargets() {
   }
 }
 
-// Display the artificial cursor
 void displayArtificialCursor() {
   shape(artificialCursor, cursorPos.x - 10, cursorPos.y - 10);
   
-  // Update the artificial cursor position based on mouse movement
-  if (mouseX != cursorPos.x || mouseY != cursorPos.y) {
-    PVector mouseDelta = new PVector(mouseX - previousCursorPos.x, mouseY - previousCursorPos.y);
-    
-    // Apply sticky targets technique if active
-    if (currentCondition.type.equals("STICKY")) {
-      applyStickyTargets(mouseDelta);
-    }
-    
-    // Update cursor position
-    cursorPos.add(mouseDelta);
-    previousCursorPos.set(mouseX, mouseY);
-    
-    // Move the real cursor to the artificial cursor position
-    try {
-      robot.mouseMove((int) cursorPos.x,(int) cursorPos.y);
-    } catch(Exception e) {
-      e.printStackTrace();
+  // Calculate the delta vector for cursor movement
+  PVector delta = new PVector(mouseX - cursorPos.x, mouseY - cursorPos.y);
+  
+  // Check for intersections with targets and adjust the delta vector
+  if (currentCondition.type.equals("STICKY")) {
+    for (Target target : targets) {
+      float intersectionLength = target.intersectionLength(cursorPos.x, cursorPos.y, mouseX, mouseY);
+      if (intersectionLength > 0) {
+        float fractionInside = intersectionLength / delta.mag();
+        float stickyStrength = currentCondition.stickyStrength;
+        delta.setMag(delta.mag() * (1 - fractionInside + fractionInside / stickyStrength));
+      }
     }
   }
+  
+  // Update artificial cursor position with the adjusted delta vector
+  cursorPos.add(delta);
+  
+  // Move the real cursor to the artificial cursor position
+  robot.mouseMove((int)cursorPos.x, (int)cursorPos.y);
 }
 
 // Display the finished screen
@@ -163,20 +158,6 @@ void displayFinishedScreen() {
   textSize(32);
   textAlign(CENTER, CENTER);
   text("Experiment complete. Thank you for participating.", width / 2, height / 2);
-}
-
-// Apply sticky targets technique
-void applyStickyTargets(PVector mouseDelta) {
-  for (Target target : targets) {
-    // Calculate intersection length between the cursor path and the target
-    float intersection = target.intersectionLength(previousCursorPos.x, previousCursorPos.y, cursorPos.x, cursorPos.y);
-    
-    if (intersection > 0) {
-      // Adjust the mouse delta based on the sticky strength
-      float fractionInside = intersection / mouseDelta.mag();
-      mouseDelta.mult(1 + (stickyStrength - 1) * fractionInside);
-    }
-  }
 }
 
 // Handle mouse clicks
