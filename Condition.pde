@@ -18,7 +18,6 @@ class Condition {
   void recordTrial(boolean success, long completionTime, float fittsID, int errors) {
     String result = name + "," + (results.size() + 1) + "," + fittsID + "," + completionTime + "," + errors;
     results.add(result);
-    errorCount = 0; // Reset error count after recording trial
   }
   
   void incrementErrorCount() {
@@ -27,6 +26,10 @@ class Condition {
   
   int getErrorCount() {
     return errorCount;
+  }
+  
+  void resetErrorCount() {
+    errorCount = 0;
   }
   
   String getResults() {
