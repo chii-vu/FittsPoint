@@ -1,17 +1,17 @@
 class Condition {
   String name;
   String type;
-  float amplitude;
-  float width;
+  float stickyStrength;
+  float gravityStrength;
   int totalTrials;
   int errorCount = 0;
   ArrayList<String> results = new ArrayList<String>();
   
-  Condition(String name, String type, float amplitude, float width, int totalTrials) {
+  Condition(String name, String type, float stickyStrength, float gravityStrength, int totalTrials) {
     this.name = name;
     this.type = type;
-    this.amplitude = amplitude;
-    this.width = width;
+    this.stickyStrength = stickyStrength;
+    this.gravityStrength = gravityStrength;;
     this.totalTrials = totalTrials;
   }
   
