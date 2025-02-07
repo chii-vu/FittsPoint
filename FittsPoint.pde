@@ -237,8 +237,8 @@ public void mousePressed() {
       if (targets.get(targetIndex).isClicked(cursorPos.x, cursorPos.y)) {
         // Correct selection
         if (currentTrial >= PRACTICE_TRIALS) {
-          float distance = dist(cursorPos.x, cursorPos.y, targets.get(targetIndex).x, targets.get(targetIndex).y);
-          float fittsID = calculateFittsID(distance, targets.get(targetIndex).radius * 2);
+          float distance = dist(cursorPos.x, cursorPos.y, targets.get(targetIndex).getX(), targets.get(targetIndex).getY());
+          float fittsID = calculateFittsID(distance, targets.get(targetIndex).getRadius() * 2);
           currentCondition.recordTrial(true, millis() - trialStartTime, fittsID, currentCondition.getErrorCount());
         }
       } else {
@@ -246,8 +246,8 @@ public void mousePressed() {
         currentCondition.incrementErrorCount();
         if (currentTrial >= PRACTICE_TRIALS) {
           // Record the error trial
-          float distance = dist(cursorPos.x, cursorPos.y, targets.get(targetIndex).x, targets.get(targetIndex).y);
-          float fittsID = calculateFittsID(distance, targets.get(targetIndex).radius * 2);
+          float distance = dist(cursorPos.x, cursorPos.y, targets.get(targetIndex).getX(), targets.get(targetIndex).getY());
+          float fittsID = calculateFittsID(distance, targets.get(targetIndex).getRadius() * 2);
           currentCondition.recordTrial(false, millis() - trialStartTime, fittsID, currentCondition.getErrorCount());
         }
       }
