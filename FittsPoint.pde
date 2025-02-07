@@ -237,8 +237,9 @@ public void mousePressed() {
       if (targets.get(targetIndex).isClicked(cursorPos.x, cursorPos.y)) {
         // Correct selection
         if (currentTrial >= PRACTICE_TRIALS) {
-          float distance = dist(cursorPos.x, cursorPos.y, targets.get(targetIndex).getX(), targets.get(targetIndex).getY());
-          float fittsID = calculateFittsID(distance, targets.get(targetIndex).getRadius() * 2);
+          float distanceToTarget = dist(cursorPos.x, cursorPos.y, targets.get(targetIndex).getX(), targets.get(targetIndex).getY());
+          float targetWidth = targets.get(targetIndex).getRadius() * 2; // Diameter of the target
+          float fittsID = calculateFittsID(distanceToTarget, targetWidth);
           currentCondition.recordTrial(true, millis() - trialStartTime, fittsID, currentCondition.getErrorCount());
         }
       } else {
@@ -246,8 +247,9 @@ public void mousePressed() {
         currentCondition.incrementErrorCount();
         if (currentTrial >= PRACTICE_TRIALS) {
           // Record the error trial
-          float distance = dist(cursorPos.x, cursorPos.y, targets.get(targetIndex).getX(), targets.get(targetIndex).getY());
-          float fittsID = calculateFittsID(distance, targets.get(targetIndex).getRadius() * 2);
+          float distanceToTarget = dist(cursorPos.x, cursorPos.y, targets.get(targetIndex).getX(), targets.get(targetIndex).getY());
+          float targetWidth = targets.get(targetIndex).getRadius() * 2; // Diameter of the target
+          float fittsID = calculateFittsID(distanceToTarget, targetWidth);
           currentCondition.recordTrial(false, millis() - trialStartTime, fittsID, currentCondition.getErrorCount());
         }
       }
