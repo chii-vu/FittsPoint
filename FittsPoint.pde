@@ -3,7 +3,7 @@ import java.util.ArrayList;
 
 // Constants
 final int NUM_TARGETS = 30;
-final int NUM_TRIALS = 10;
+final int NUM_TRIALS = 60;
 final int PRACTICE_TRIALS = 5;
 final int SCREEN_WIDTH = 1920;
 final int SCREEN_HEIGHT = 1080;
@@ -69,7 +69,7 @@ public void setup() {
     targets.add(new Target(x, y, radius));
   }
   
-  // Test conditions
+  // Sticky First (Increasing Strength)
   conditions = new ArrayList<Condition>();
   conditions.add(new Condition("Sticky-Zero", "Regular", 0, NUM_TRIALS));
   conditions.add(new Condition("Sticky-Low", "STICKY", 5.0, NUM_TRIALS)); // Low sticky
@@ -81,6 +81,17 @@ public void setup() {
   conditions.add(new Condition("Gravity-Medium", "GRAVITY", 50.0, NUM_TRIALS)); // Medium gravity
   conditions.add(new Condition("Gravity-High", "GRAVITY", 75.0, NUM_TRIALS)); // High gravity
 
+  // Gravity First (Decreasing Strength)
+  conditions.add(new Condition("Gravity-High", "GRAVITY", 75.0, NUM_TRIALS)); // High gravity
+  conditions.add(new Condition("Gravity-Medium", "GRAVITY", 50.0, NUM_TRIALS)); // Medium gravity
+  conditions.add(new Condition("Gravity-Low", "GRAVITY", 25.0, NUM_TRIALS)); // Low gravity
+  conditions.add(new Condition("Gravity-Zero", "GRAVITY", 0.0, NUM_TRIALS)); // Gravity zero
+
+  conditions.add(new Condition("Sticky-High", "STICKY", 30.0, NUM_TRIALS)); // High sticky
+  conditions.add(new Condition("Sticky-Medium", "STICKY", 10.0, NUM_TRIALS)); // Medium sticky
+  conditions.add(new Condition("Sticky-Low", "STICKY", 5.0, NUM_TRIALS)); // Low sticky
+  conditions.add(new Condition("Sticky-Zero", "Regular", 0, NUM_TRIALS));
+  
   // Hide the real cursor
   noCursor();
 }
