@@ -75,7 +75,12 @@ public void setup() {
   conditions.add(new Condition("Sticky-Low", "STICKY", 2.0, NUM_TRIALS)); // Low sticky
   conditions.add(new Condition("Sticky-Medium", "STICKY", 10.0, NUM_TRIALS)); // Medium sticky
   conditions.add(new Condition("Sticky-High", "STICKY", 30.0, NUM_TRIALS)); // High sticky
-  
+
+  conditions.add(new Condition("Gravity-Zero", "GRAVITY", 0.0, NUM_TRIALS)); // Gravity zero
+  conditions.add(new Condition("Gravity-Low", "GRAVITY", 50.0, NUM_TRIALS)); // Low gravity
+  conditions.add(new Condition("Gravity-Medium", "GRAVITY", 75.0, NUM_TRIALS)); // Medium gravity
+  conditions.add(new Condition("Gravity-High", "GRAVITY", 100.0, NUM_TRIALS)); // High gravity
+
   // Hide the real cursor
   noCursor();
 }
@@ -132,8 +137,7 @@ void displayArtificialCursor() {
   
   // Calculate the delta vector for cursor movement
   PVector delta = new PVector(mouseX - cursorPos.x, mouseY - cursorPos.y);
-  
-  // Check for intersections with targets and adjust the delta vector
+
   if (currentCondition.type.equals("STICKY")) {
     for (Target target : targets) {
       float intersectionLength = target.intersectionLength(cursorPos.x, cursorPos.y, mouseX, mouseY);
@@ -143,6 +147,46 @@ void displayArtificialCursor() {
         delta.setMag(delta.mag() * (1 - fractionInside + fractionInside / stickyStrength));
       }
     }
+  } else if (currentCondition.type.equals("GRAVITY")) {
+    PVector gravityEffect = new PVector(0, 0);
+    float distanceThreshold = 500;
+
+    // Calculate the cursor's next position
+    float cursorX = cursorPos.x + delta.x;
+    float cursorY = cursorPos.y + delta.y;
+
+    for (Target target : targets) {
+      // Calculate distance from cursor to the center of the target
+      float distance = dist(cursorX, cursorY, target.x, target.y);
+      
+      // Calculate distance relative to the edge of the target
+      float distanceFromEdge = distance - target.radius;
+      
+      // Ignore targets too far away
+      if (distanceFromEdge > distanceThreshold) continue;
+
+      // Compute direction from cursor to center of target
+      PVector gravityVector = new PVector(target.x - cursorX, target.y - cursorY);
+      gravityVector.normalize();
+
+      // Gravity intensity based on how close the cursor is
+      float gravityStrength;
+
+      if (distanceFromEdge > 0) {
+        // Outside the target: Scale pull based on proximity to edge
+        gravityStrength = currentCondition.strength * (1 - (distanceFromEdge / distanceThreshold));
+      } else {
+        // Inside the target: Stronger pull to the center
+        gravityStrength = currentCondition.strength * (1 + abs(distanceFromEdge) / target.radius);
+      }
+
+      // Apply gravity force
+      gravityVector.mult(gravityStrength);
+      gravityEffect.add(gravityVector);
+    }
+    
+    // Apply cumulative gravity effect to the delta vector
+    delta.add(gravityEffect);
   }
   
   // Update artificial cursor position with the adjusted delta vector
@@ -241,7 +285,7 @@ void startNextTrial() {
 
 // Calculate Fitts' ID
 float calculateFittsID(float distance, float width) {
-  return(float)(log(distance / width + 1) / log(2)); // Use log base 2
+  return(float)(log(distance / width + 1) / log(2));
 }
 
 void saveResultsToFile() {
