@@ -15,6 +15,18 @@ class Target {
     ellipse(x, y, radius * 2, radius * 2);
   }
 
+  float getX() {
+    return x;
+  }
+
+  float getY() {
+    return y;
+  }
+
+  float getRadius() {
+    return radius;
+  }
+
   void setColor(int colour) {
     this.colour = colour;
   }

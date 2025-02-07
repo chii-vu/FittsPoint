@@ -60,7 +60,7 @@ public void setup() {
       
       // Check for overlaps with existing targets
       for (Target target : targets) {
-        if (dist(x, y, target.x, target.y) < radius + target.radius) {
+        if (dist(x, y, target.getX(), target.getY()) < radius + target.getRadius()) {
           overlap = true;
           break;
         }
@@ -179,16 +179,16 @@ void applyGravityBehaviour(PVector delta) {
 
   for (Target target : targets) {
     // Calculate distance from cursor to the center of the target
-    float distance = dist(cursorX, cursorY, target.x, target.y);
+    float distance = dist(cursorX, cursorY, target.getX(), target.getY());
     
     // Calculate distance relative to the edge of the target
-    float distanceFromEdge = distance - target.radius;
+    float distanceFromEdge = distance - target.getRadius();
     
     // Ignore targets too far away
     if (distanceFromEdge > distanceThreshold) continue;
 
     // Compute direction from cursor to center of target
-    PVector gravityVector = new PVector(target.x - cursorX, target.y - cursorY);
+    PVector gravityVector = new PVector(target.getX() - cursorX, target.getY() - cursorY);
     gravityVector.normalize();
 
     // Gravity intensity based on how close the cursor is
@@ -199,7 +199,7 @@ void applyGravityBehaviour(PVector delta) {
       gravityStrength = currentCondition.getStrength() * (1 - (distanceFromEdge / distanceThreshold));
     } else {
       // Inside the target: Stronger pull to the center
-      gravityStrength = currentCondition.getStrength() * (1 + abs(distanceFromEdge) / target.radius);
+      gravityStrength = currentCondition.getStrength() * (1 + abs(distanceFromEdge) / target.getRadius());
     }
 
     // Apply gravity force
