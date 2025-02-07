@@ -17,6 +17,22 @@ class Condition {
     String result = name + "," + (results.size() + 1) + "," + fittsID + "," + completionTime + "," + errors;
     results.add(result);
   }
+
+  String getName() {
+    return name;
+  }
+
+  String getType() {
+    return type;
+  }
+
+  float getStrength() {
+    return strength;
+  }
+
+  int getTotalTrials() {
+    return totalTrials;
+  }
   
   void incrementErrorCount() {
     errorCount++;
