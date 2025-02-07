@@ -69,10 +69,10 @@ public void setup() {
     targets.add(new Target(x, y, radius));
   }
   
-  // Initialize conditions
+  // Test conditions
   conditions = new ArrayList<Condition>();
   conditions.add(new Condition("Sticky-Zero", "Regular", 0, NUM_TRIALS));
-  conditions.add(new Condition("Sticky-Low", "STICKY", 2.0, NUM_TRIALS)); // Low sticky
+  conditions.add(new Condition("Sticky-Low", "STICKY", 5.0, NUM_TRIALS)); // Low sticky
   conditions.add(new Condition("Sticky-Medium", "STICKY", 10.0, NUM_TRIALS)); // Medium sticky
   conditions.add(new Condition("Sticky-High", "STICKY", 30.0, NUM_TRIALS)); // High sticky
 
@@ -300,7 +300,7 @@ void startNextTrial() {
 
 // Calculate Fitts' ID
 float calculateFittsID(float distance, float width) {
-  return(float)(log(distance / width + 1) / log(2));
+  return log(distance / width + 1) / log(2);
 }
 
 void saveResultsToFile() {
