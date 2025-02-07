@@ -77,9 +77,9 @@ public void setup() {
   conditions.add(new Condition("Sticky-High", "STICKY", 30.0, NUM_TRIALS)); // High sticky
 
   conditions.add(new Condition("Gravity-Zero", "GRAVITY", 0.0, NUM_TRIALS)); // Gravity zero
-  conditions.add(new Condition("Gravity-Low", "GRAVITY", 50.0, NUM_TRIALS)); // Low gravity
-  conditions.add(new Condition("Gravity-Medium", "GRAVITY", 75.0, NUM_TRIALS)); // Medium gravity
-  conditions.add(new Condition("Gravity-High", "GRAVITY", 100.0, NUM_TRIALS)); // High gravity
+  conditions.add(new Condition("Gravity-Low", "GRAVITY", 25.0, NUM_TRIALS)); // Low gravity
+  conditions.add(new Condition("Gravity-Medium", "GRAVITY", 50.0, NUM_TRIALS)); // Medium gravity
+  conditions.add(new Condition("Gravity-High", "GRAVITY", 75.0, NUM_TRIALS)); // High gravity
 
   // Hide the real cursor
   noCursor();
@@ -122,7 +122,7 @@ void displayConditionScreen() {
   fill(0);
   textSize(32);
   textAlign(CENTER, CENTER);
-  text("Next condition: " + currentCondition.name + "\nClick to start.", width / 2, height / 2);
+  text("Next condition: " + currentCondition.getName() + "\nClick to start.", width / 2, height / 2);
 }
 
 // Display the targets
@@ -138,55 +138,11 @@ void displayArtificialCursor() {
   // Calculate the delta vector for cursor movement
   PVector delta = new PVector(mouseX - cursorPos.x, mouseY - cursorPos.y);
 
-  if (currentCondition.type.equals("STICKY")) {
-    for (Target target : targets) {
-      float intersectionLength = target.intersectionLength(cursorPos.x, cursorPos.y, mouseX, mouseY);
-      if (intersectionLength > 0) {
-        float fractionInside = intersectionLength / delta.mag();
-        float stickyStrength = currentCondition.strength;
-        delta.setMag(delta.mag() * (1 - fractionInside + fractionInside / stickyStrength));
-      }
-    }
-  } else if (currentCondition.type.equals("GRAVITY")) {
-    PVector gravityEffect = new PVector(0, 0);
-    float distanceThreshold = 500;
-
-    // Calculate the cursor's next position
-    float cursorX = cursorPos.x + delta.x;
-    float cursorY = cursorPos.y + delta.y;
-
-    for (Target target : targets) {
-      // Calculate distance from cursor to the center of the target
-      float distance = dist(cursorX, cursorY, target.x, target.y);
-      
-      // Calculate distance relative to the edge of the target
-      float distanceFromEdge = distance - target.radius;
-      
-      // Ignore targets too far away
-      if (distanceFromEdge > distanceThreshold) continue;
-
-      // Compute direction from cursor to center of target
-      PVector gravityVector = new PVector(target.x - cursorX, target.y - cursorY);
-      gravityVector.normalize();
-
-      // Gravity intensity based on how close the cursor is
-      float gravityStrength;
-
-      if (distanceFromEdge > 0) {
-        // Outside the target: Scale pull based on proximity to edge
-        gravityStrength = currentCondition.strength * (1 - (distanceFromEdge / distanceThreshold));
-      } else {
-        // Inside the target: Stronger pull to the center
-        gravityStrength = currentCondition.strength * (1 + abs(distanceFromEdge) / target.radius);
-      }
-
-      // Apply gravity force
-      gravityVector.mult(gravityStrength);
-      gravityEffect.add(gravityVector);
-    }
-    
-    // Apply cumulative gravity effect to the delta vector
-    delta.add(gravityEffect);
+  // Apply behaviour based on the current condition
+  if (currentCondition.getType().equals("STICKY")) {
+    applyStickyBehaviour(delta);
+  } else if (currentCondition.getType().equals("GRAVITY")) {
+    applyGravityBehaviour(delta);
   }
   
   // Update artificial cursor position with the adjusted delta vector
@@ -194,6 +150,65 @@ void displayArtificialCursor() {
   
   // Move the real cursor to the artificial cursor position
   robot.mouseMove((int)cursorPos.x, (int)cursorPos.y);
+}
+
+// Apply sticky behaviour
+void applyStickyBehaviour(PVector delta) {
+  for (Target target : targets) {
+    // Use provided function to calculate intersection length
+    float intersectionLength = target.intersectionLength(cursorPos.x, cursorPos.y, mouseX, mouseY);
+    if (intersectionLength > 0) {
+      // Calculate the fraction of the delta vector that is inside the target
+      float fractionInside = intersectionLength / delta.mag();
+      float stickyStrength = currentCondition.getStrength();
+
+      // Scale the delta vector based on the fraction inside and sticky strength
+      delta.setMag(delta.mag() * (1 - fractionInside + fractionInside / stickyStrength));
+    }
+  }
+}
+
+// Apply gravity behaviour
+void applyGravityBehaviour(PVector delta) {
+  PVector gravityEffect = new PVector(0, 0);
+  float distanceThreshold = 500;
+
+  // Calculate the cursor's next position
+  float cursorX = cursorPos.x + delta.x;
+  float cursorY = cursorPos.y + delta.y;
+
+  for (Target target : targets) {
+    // Calculate distance from cursor to the center of the target
+    float distance = dist(cursorX, cursorY, target.x, target.y);
+    
+    // Calculate distance relative to the edge of the target
+    float distanceFromEdge = distance - target.radius;
+    
+    // Ignore targets too far away
+    if (distanceFromEdge > distanceThreshold) continue;
+
+    // Compute direction from cursor to center of target
+    PVector gravityVector = new PVector(target.x - cursorX, target.y - cursorY);
+    gravityVector.normalize();
+
+    // Gravity intensity based on how close the cursor is
+    float gravityStrength;
+
+    if (distanceFromEdge > 0) {
+      // Outside the target: Scale pull based on proximity to edge
+      gravityStrength = currentCondition.getStrength() * (1 - (distanceFromEdge / distanceThreshold));
+    } else {
+      // Inside the target: Stronger pull to the center
+      gravityStrength = currentCondition.getStrength() * (1 + abs(distanceFromEdge) / target.radius);
+    }
+
+    // Apply gravity force
+    gravityVector.mult(gravityStrength);
+    gravityEffect.add(gravityVector);
+  }
+  
+  // Apply cumulative gravity effect to the delta vector
+  delta.add(gravityEffect);
 }
 
 // Display the finished screen
@@ -219,7 +234,7 @@ public void mousePressed() {
     
     case TRIAL:
       // Check if the click is on the target
-      if (targets.get(targetIndex).isClicked(mouseX, mouseY)) {
+      if (targets.get(targetIndex).isClicked(cursorPos.x, cursorPos.y)) {
         // Correct selection
         if (currentTrial >= PRACTICE_TRIALS) {
           float distance = dist(cursorPos.x, cursorPos.y, targets.get(targetIndex).x, targets.get(targetIndex).y);
@@ -240,7 +255,7 @@ public void mousePressed() {
       // Move to the next trial
       currentCondition.resetErrorCount();
       currentTrial++;
-      if (currentTrial < currentCondition.totalTrials) {
+      if (currentTrial < currentCondition.getTotalTrials()) {
         startNextTrial();
       } else {
         phase = ExperimentPhase.BEFORE_CONDITION; // Move to next condition
