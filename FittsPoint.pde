@@ -181,46 +181,28 @@ void applyStickyBehaviour(PVector delta) {
 
 // Apply gravity behaviour
 void applyGravityBehaviour(PVector delta) {
-  PVector gravityEffect = new PVector(0, 0);
-  float distanceThreshold = 500;
+  PVector totalGravity = new PVector(0, 0);
+  float distanceCutoff = 500;
+  PVector nextPos = PVector.add(cursorPos, delta);
 
-  // Calculate the cursor's next position
-  float cursorX = cursorPos.x + delta.x;
-  float cursorY = cursorPos.y + delta.y;
-
-  for (Target target : targets) {
-    // Calculate distance from cursor to the center of the target
-    float distance = dist(cursorX, cursorY, target.getX(), target.getY());
-    
-    // Calculate distance relative to the edge of the target
-    float distanceFromEdge = distance - target.getRadius();
-    
-    // Ignore targets too far away
-    if (distanceFromEdge > distanceThreshold) continue;
-
-    // Compute direction from cursor to center of target
-    PVector gravityVector = new PVector(target.getX() - cursorX, target.getY() - cursorY);
-    gravityVector.normalize();
-
-    // Gravity intensity based on how close the cursor is
-    float gravityStrength;
-
-    if (distanceFromEdge > 0) {
-      // Outside the target: Scale pull based on proximity to edge
-      gravityStrength = currentCondition.getStrength() * (1 - (distanceFromEdge / distanceThreshold));
-    } else {
-      // Inside the target: Stronger pull to the center
-      gravityStrength = currentCondition.getStrength() * (1 + abs(distanceFromEdge) / target.getRadius());
+  for (Target t : targets) {
+    float distToCenter = dist(nextPos.x, nextPos.y, t.getX(), t.getY());
+    if (distToCenter - t.getRadius() <= distanceCutoff) {
+      PVector pull = new PVector(t.getX() - nextPos.x, t.getY() - nextPos.y);
+      pull.normalize();
+      float pullStrength = currentCondition.getStrength();
+      float distFromEdge = distToCenter - t.getRadius();
+      // Adjust pull based on how close we are
+      pullStrength *= (distFromEdge > 0)
+        ? (1 - (distFromEdge / distanceCutoff))
+        : (1 + abs(distFromEdge) / t.getRadius());
+      pull.mult(pullStrength);
+      totalGravity.add(pull);
     }
-
-    // Apply gravity force
-    gravityVector.mult(gravityStrength);
-    gravityEffect.add(gravityVector);
   }
-  
-  // Apply cumulative gravity effect to the delta vector
-  delta.add(gravityEffect);
+  delta.add(totalGravity);
 }
+
 
 // Display the finished screen
 void displayFinishedScreen() {
@@ -318,7 +300,7 @@ float calculateFittsID(float distance, float width) {
 
 void saveResultsToFile() {
   try {
-    String fileName = "data.csv";
+    String fileName = "data/data.csv";
     PrintWriter writer = createWriter(fileName);
     
     writer.println("ConditionName,TrialNumber,FittsID,CompletionTime,Errors");
