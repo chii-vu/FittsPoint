@@ -71,7 +71,7 @@ public void setup() {
   
   // Sticky First (Increasing Strength)
   conditions = new ArrayList<Condition>();
-  conditions.add(new Condition("Sticky-Zero", "Regular", 0, NUM_TRIALS));
+  conditions.add(new Condition("Sticky-Zero", "STICKY", 0.0, NUM_TRIALS)); // Zero sticky
   conditions.add(new Condition("Sticky-Low", "STICKY", 5.0, NUM_TRIALS)); // Low sticky
   conditions.add(new Condition("Sticky-Medium", "STICKY", 10.0, NUM_TRIALS)); // Medium sticky
   conditions.add(new Condition("Sticky-High", "STICKY", 30.0, NUM_TRIALS)); // High sticky
@@ -90,7 +90,7 @@ public void setup() {
   conditions.add(new Condition("Sticky-High", "STICKY", 30.0, NUM_TRIALS)); // High sticky
   conditions.add(new Condition("Sticky-Medium", "STICKY", 10.0, NUM_TRIALS)); // Medium sticky
   conditions.add(new Condition("Sticky-Low", "STICKY", 5.0, NUM_TRIALS)); // Low sticky
-  conditions.add(new Condition("Sticky-Zero", "Regular", 0, NUM_TRIALS));
+  conditions.add(new Condition("Sticky-Zero", "STICKY", 0.0, NUM_TRIALS)); // Zero sticky
   
   // Hide the real cursor
   noCursor();
@@ -150,9 +150,9 @@ void displayArtificialCursor() {
   PVector delta = new PVector(mouseX - cursorPos.x, mouseY - cursorPos.y);
 
   // Apply behaviour based on the current condition
-  if (currentCondition.getType().equals("STICKY")) {
+  if (currentCondition.getType().equals("STICKY") && currentCondition.getStrength() > 0) {
     applyStickyBehaviour(delta);
-  } else if (currentCondition.getType().equals("GRAVITY")) {
+  } else if (currentCondition.getType().equals("GRAVITY") && currentCondition.getStrength() > 0) {
     applyGravityBehaviour(delta);
   }
   
