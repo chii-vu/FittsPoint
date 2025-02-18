@@ -2,6 +2,8 @@
 
 This project investigates the effectiveness of various target assistance techniques in pointing tasks, with a focus on two techniques: Sticky Targets and Target Gravity. The experimental setup and data analysis were designed to evaluate these techniques through controlled trials, measuring their impact on pointing accuracy and completion time.
 
+https://github.com/user-attachments/assets/f71f3610-a808-47db-9147-cf6b1ad6d8cf
+
 ## File Structure
 - **Data Files**: Stored in the `data/` directory.  
   - `data/increasing` and `data/decreasing`: Contain individual data files for the two experimental orders. These are split for easier plotting.
